@@ -7209,9 +7209,9 @@ static int syncWithMaster(void) {
     }
     dumpsize = strtol(buf+1,NULL,10);
     redisLog(REDIS_NOTICE,"Receiving %ld bytes data dump from MASTER",dumpsize);
-    /* Read the bulk write data on a temp file */
+    /* Read the bulk write data on a temp file that we must create */
     snprintf(tmpfile,256,"temp-%d.%ld.rdb",(int)time(NULL),(long int)random());
-    dfd = open(tmpfile,O_CREAT|O_WRONLY,0644);
+    dfd = open(tmpfile,O_CREAT|O_EXCL|O_WRONLY,0644);
     if (dfd == -1) {
         close(fd);
         redisLog(REDIS_WARNING,"Opening the temp file needed for MASTER <-> SLAVE synchronization: %s",strerror(errno));
@@ -7239,7 +7239,7 @@ static int syncWithMaster(void) {
     }
     close(dfd);
     if (rename(tmpfile,server.dbfilename) == -1) {
-        redisLog(REDIS_WARNING,"Failed trying to rename the temp DB into dump.rdb in MASTER <-> SLAVE synchronization: %s", strerror(errno));
+        redisLog(REDIS_WARNING,"Failed trying to rename the temp DB (%s) into dump.rdb in MASTER <-> SLAVE synchronization: %s", tmpfile, strerror(errno));
         unlink(tmpfile);
         close(fd);
         return REDIS_ERR;
