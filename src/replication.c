@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <assert.h>
 
 /* ---------------------------------- MASTER -------------------------------- */
 
@@ -376,6 +377,7 @@ void readSyncBulkPayload(aeEventLoop *el, int fd, void *privdata, int mask) {
         zfree(server.repl_transfer_tmpfile);
         close(server.repl_transfer_fd);
         server.master = createClient(server.repl_transfer_s);
+        assert(server.master);
         server.master->flags |= REDIS_MASTER;
         server.master->authenticated = 1;
         server.replstate = REDIS_REPL_CONNECTED;

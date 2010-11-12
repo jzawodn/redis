@@ -22,6 +22,7 @@ redisClient *createClient(int fd) {
     {
         close(fd);
         zfree(c);
+        redisLog(REDIS_WARNING,"Error in createClient");
         return NULL;
     }
 
